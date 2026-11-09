@@ -1,6 +1,6 @@
 services:
   postgresql:
-    image: postgres:12
+    image: postgres:18
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -34,8 +34,8 @@ services:
     ports:
       - "5000:5000"
     environment:
-      DB_HOST: 0.0.0.0
-      REDIS_URL: 0.0.0.0
+      DB_HOST: postgresql 
+      REDIS_URL: redis
       DB_USER: postgres
       DB_PASSWORD: toto
       DB_PORT: 5432
