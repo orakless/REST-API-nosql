@@ -15,6 +15,10 @@ db_password = os.environ.get('DB_PASSWORD')
 db_host = os.environ.get('DB_HOST')
 db_port = os.environ.get('DB_PORT')
 redis_host = os.environ.get('REDIS_URL')
+PRODUCTS_FILE = os.environ.get(
+    'PRODUCTS_FILE',
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), 'products.json')
+)
 r = redis.Redis(host=redis_host, port=6379, decode_responses=True)
 
 
@@ -259,9 +263,8 @@ if __name__ == '__main__':
     OrderOrderItemThrough = OrderItem.orders.get_through_model()
     OrderOrderItemThrough.create_table(safe=True)
 
-    response = requests.get('http://dimprojetu.uqac.ca/~jgnault/shops/products/')
-    products = response.json()
-    products = products['products']
+    with open(PRODUCTS_FILE, encoding='utf-8') as f:
+        products = json.load(f)['products']
 
     for product in products:
         if Product.get_or_none(id=product['id']) is None:

@@ -1,0 +1,136 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Oeufs bruns",
+      "type": "dairy",
+      "description": "Oeufs de poules élevées en plein air, boîte de 12.",
+      "image": "1.jpg",
+      "height": 600,
+      "weight": 400,
+      "price": 28.1,
+      "in_stock": true
+    },
+    {
+      "id": 2,
+      "name": "Fraises sucrées",
+      "type": "fruit",
+      "description": "Fraises fraîches et sucrées, cueillies à la main.",
+      "image": "2.jpg",
+      "height": 120,
+      "weight": 500,
+      "price": 12.5,
+      "in_stock": true
+    },
+    {
+      "id": 3,
+      "name": "Lait entier",
+      "type": "dairy",
+      "description": "Lait entier pasteurisé, bouteille d'un litre.",
+      "image": "3.jpg",
+      "height": 250,
+      "weight": 1000,
+      "price": 6.9,
+      "in_stock": true
+    },
+    {
+      "id": 4,
+      "name": "Pain au levain",
+      "type": "bakery",
+      "description": "Pain artisanal au levain naturel, croûte croustillante.",
+      "image": "4.jpg",
+      "height": 110,
+      "weight": 650,
+      "price": 8.5,
+      "in_stock": true
+    },
+    {
+      "id": 5,
+      "name": "Fromage de chèvre",
+      "type": "dairy",
+      "description": "Fromage de chèvre frais affiné pendant deux semaines.",
+      "image": "5.jpg",
+      "height": 60,
+      "weight": 200,
+      "price": 15.75,
+      "in_stock": true
+    },
+    {
+      "id": 6,
+      "name": "Miel de lavande",
+      "type": "pantry",
+      "description": "Miel liquide de lavande, pot en verre de 500 g.",
+      "image": "6.jpg",
+      "height": 100,
+      "weight": 500,
+      "price": 18.0,
+      "in_stock": true
+    },
+    {
+      "id": 7,
+      "name": "Tomates anciennes",
+      "type": "vegetable",
+      "description": "Assortiment de tomates anciennes de couleurs variées.",
+      "image": "7.jpg",
+      "height": 90,
+      "weight": 800,
+      "price": 9.3,
+      "in_stock": true
+    },
+    {
+      "id": 8,
+      "name": "Pommes Gala",
+      "type": "fruit",
+      "description": "Pommes Gala croquantes, sac de 1 kg.",
+      "image": "8.jpg",
+      "height": 180,
+      "weight": 1000,
+      "price": 7.2,
+      "in_stock": true
+    },
+    {
+      "id": 9,
+      "name": "Beurre doux",
+      "type": "dairy",
+      "description": "Beurre doux baratté, plaquette de 250 g.",
+      "image": "9.jpg",
+      "height": 40,
+      "weight": 250,
+      "price": 5.4,
+      "in_stock": true
+    },
+    {
+      "id": 10,
+      "name": "Saucisson sec",
+      "type": "meat",
+      "description": "Saucisson sec artisanal, séché lentement pendant six semaines.",
+      "image": "10.jpg",
+      "height": 45,
+      "weight": 300,
+      "price": 14.9,
+      "in_stock": false
+    },
+    {
+      "id": 11,
+      "name": "Huile d'olive vierge extra",
+      "type": "pantry",
+      "description": "Huile d'olive vierge extra de première pression à froid, 75 cl.",
+      "image": "11.jpg",
+      "height": 280,
+      "weight": 900,
+      "price": 22.0,
+      "in_stock": true
+    },
+    {
+      "id": 12,
+      "name": "Carottes bio",
+      "type": "vegetable",
+      "description": "Carottes biologiques en botte, cultivées localement.",
+      "image": "12.jpg",
+      "height": 300,
+      "weight": 700,
+      "price": 4.6,
+      "in_stock": false
+    }
+  ]
+}
