@@ -1,8 +1,66 @@
-# REST-API
-REST-API responsable de paiement de commandes Internet utilisant Flask, postgreSQL et Redis. 
+# REST-API NoSQL
 
-Pour lancer l'app : docker run -p 5000:5000 {nomConteneur}
+Application Flask de commandes en ligne. Chaque commande est persistée dans **PostgreSQL** et **Redis** (historique, événements, statistiques, cache).
 
-L'initialisation de la base de donnees est faite automatiquement au lancement de l'application. \
-Toutes les variables d'environnement sont deja initialisees dans le dockerfile mais vous pouvez les changer au besoin. \
-Le front end est disponible à partir des routes /web/ 
+## TODO
+
+- **Web** : afficher les données Redis dans les pages (routes JSON déjà prêtes) :
+  - page `/web/history` : dernières commandes + stats (`/orders/recent`)
+  - bloc « Top produits » sur `/web` (`/products/top`)
+  - historique par email sur `/web/checkOrder` (`/customers/<email>/orders`)
+- **Web** : formulaires pour l'adresse de livraison et le paiement (aujourd'hui uniquement via `PUT /order/<id>` en JSON)
+- **Web** : retirer `http://127.0.0.1:5000` codé en dur dans `templates/checkOrder.html` (casse en déploiement)
+- **Web** : check les pages et les rework si besoin ?
+- **Déploiement** sur un hébergeur
+
+## Lancer
+
+```bash
+git clone <url-du-repo> && cd REST-API-nosql
+docker compose up --build
+```
+
+Les tables sont créées et les produits (`products.json`) importés automatiquement au démarrage.
+
+## Interface web
+
+| Page | URL |
+|---|---|
+| Produits | http://localhost:5000/web |
+| Passer une commande (formulaire) | http://localhost:5000/web/order |
+| Consulter une commande | http://localhost:5000/web/checkOrder |
+
+API JSON : `/` (produits), `/order/<id>`, `/orders/recent`, `/products/top`, `/customers/<email>/orders`.
+
+Paiement simulé : carte `4242 4242 4242 4242` acceptée, toute autre refusée.
+
+## Constater la persistance
+
+**Terminal 1 — PostgreSQL**
+```bash
+docker compose exec postgresql psql -U postgres -d API_REST
+```
+```sql
+\dt
+SELECT id, total_price, shipping_price, paid, email FROM "order";
+```
+
+**Terminal 2 — Redis**
+```bash
+docker compose exec redis redis-cli
+```
+```
+KEYS *
+HGETALL order:1
+LRANGE orders:recent 0 -1
+XRANGE orders:events - +
+ZREVRANGE products:sales 0 4 WITHSCORES
+MGET stats:orders stats:revenue
+```
+
+## Arrêter
+
+```bash
+docker compose down      # garde les données
+docker compose down -v   # supprime aussi les volumes
+```
