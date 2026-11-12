@@ -4,14 +4,8 @@ Application Flask de commandes en ligne. Chaque commande est persistée dans **P
 
 ## TODO
 
-- **Web** : afficher les données Redis dans les pages (routes JSON déjà prêtes) :
-  - page `/web/history` : dernières commandes et statistiques Redis (`/orders/recent`)
-  - bloc « Top produits » sur `/web` (`/products/top`)
-  - historique par e-mail sur `/web/checkOrder` (`/customers/<email>/orders`)
-- **Web** : formulaires HTML pour l'adresse de livraison et le paiement, reliés à la logique de `PUT /order/<id>`
-- **Web** : génération des URLs avec `url_for` pour éviter les adresses locales codées en dur
-- **Web** : check les pages et les rework si besoin ?
 - **Déploiement** sur un hébergeur
+- **README complet ?**
 
 ## Lancer
 
