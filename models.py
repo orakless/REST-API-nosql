@@ -1,5 +1,8 @@
 from peewee import *
+import json
+import logging
 import os
+import time
 
 
 db_name = os.environ.get('DB_NAME')
@@ -130,3 +133,40 @@ class Order(BaseModel):
         }
 
 
+
+
+OrderOrderItemThrough = Order.order_items.get_through_model()
+
+ALL_TABLES = [Product, OrderItem, CreditCard, ShippingInformation, Transaction, Order, OrderOrderItemThrough]
+
+
+def wait_for_db(retries=15, delay=2):
+    """Attend que PostgreSQL accepte les connexions (utile au démarrage docker)."""
+    for attempt in range(1, retries + 1):
+        try:
+            db.connect(reuse_if_open=True)
+            return
+        except OperationalError as e:
+            logging.warning("PostgreSQL indisponible (tentative %s/%s) : %s", attempt, retries, e)
+            time.sleep(delay)
+    raise RuntimeError("Impossible de se connecter à PostgreSQL")
+
+
+def seed_products(products_file):
+    with open(products_file, encoding='utf-8') as f:
+        products = json.load(f)['products']
+
+    for product in products:
+        if Product.get_or_none(id=product['id']) is None:
+            if "\x00" in product["description"]:
+                product["description"] = product["description"].replace("\x00", "")
+            Product.create(id=product['id'], name=product['name'], type=product['type'], description=product['description'], image=product['image'], price=product['price'], weight=product['weight'], height=product['height'], in_stock=product['in_stock'])
+
+
+def init_db(products_file):
+    """Crée les tables (idempotent) et importe les produits du JSON."""
+    wait_for_db()
+    with db.atomic():
+        db.create_tables(ALL_TABLES, safe=True)
+        seed_products(products_file)
+    db.close()
