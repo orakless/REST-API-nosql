@@ -1,18 +1,17 @@
 {% extends "base.html" %}
-{% block title %}Formulaire Commande{% endblock %}
+{% block title %}Nouvelle commande{% endblock %}
 {% block content %}
-    <h1>Formulaire Commande</h1>
-    <form id="orderForm" action="/order" method="POST">
-        <label for="productId">Identifiant du produit 1:</label>
-        <input type="text" id="productId" name="productId" required>
-        <label for="quantity">Quantité:</label>
-        <input type="text" id="quantity" name="quantity" required >
-        <br>
-        <label for="productId2">Identifiant du produit 2:</label>
-        <input type="text" id="productId2" name="productId2" required>
-        <label for="quantity2">Quantité:</label>
-        <input type="text" id="quantity2" name="quantity2" required>
-        
-        <button type="submit">Commander</button>
+<h1 class="page-heading">Créer une commande</h1>
+<p class="page-subtitle">Sélectionnez les produits et les quantités souhaitées.</p>
+<section class="card">
+    <form id="orderForm" action="{{ url_for('submit_order_form') }}" method="POST">
+        <div class="form-grid">
+            <div class="field"><label for="productId">Identifiant du produit 1</label><input type="number" min="1" id="productId" name="productId" required></div>
+            <div class="field"><label for="quantity">Quantité</label><input type="number" min="1" id="quantity" name="quantity" required></div>
+            <div class="field"><label for="productId2">Identifiant du produit 2</label><input type="number" min="1" id="productId2" name="productId2" required></div>
+            <div class="field"><label for="quantity2">Quantité</label><input type="number" min="1" id="quantity2" name="quantity2" required></div>
+        </div>
+        <button type="submit">Créer la commande</button>
     </form>
+</section>
 {% endblock %}

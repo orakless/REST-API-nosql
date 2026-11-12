@@ -1,36 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Consulter une commande{% endblock %}
+{% block title %}Suivi des commandes{% endblock %}
 {% block content %}
-<h1>Consulter une commande</h1>
-<form id="orderForm" action="{{ url_for('show_order', order_id=0) }}" method="GET">
-    <label for="orderId">Identifiant de la commande :</label>
-    <input type="number" min="1" id="orderId" required>
-    <button type="submit">Rechercher</button>
-</form>
+<h1 class="page-heading">Suivi des commandes</h1>
+<p class="page-subtitle">Retrouvez une commande avec son numéro ou consultez l'historique d'un client.</p>
+<section class="card">
+    <h2 class="section-title">Rechercher une commande</h2>
+    <form id="orderForm">
+        <div class="field"><label for="orderId">Numéro de commande</label><input type="number" min="1" id="orderId" placeholder="Ex. 1024" required></div>
+        <button type="submit">Rechercher la commande</button>
+    </form>
+</section>
+<section class="card">
+    <h2 class="section-title">Historique par adresse e-mail</h2>
+    <form method="GET" action="{{ url_for('show_check_order_form') }}">
+        <div class="field"><label for="email">Adresse e-mail du client</label><input type="email" id="email" name="email" value="{{ email }}" placeholder="client@exemple.fr" required></div>
+        <button type="submit">Afficher l'historique</button>
+    </form>
+    {% if email %}
+        <hr><div class="card-header"><h3 class="section-title">Commandes associées à {{ email }}</h3><span class="badge">{{ orders|length }} résultat(s)</span></div>
+        {% if orders %}
+        <ul class="order-list">{% for order in orders %}
+            <li><div><a href="{{ url_for('show_order', order_id=order.id) }}"><strong>Commande #{{ order.id }}</strong></a><div class="muted">{{ order.total_price }} €</div></div>{% if order.paid %}<span class="badge success">Payée</span>{% else %}<span class="badge pending">En attente de paiement</span>{% endif %}</li>
+        {% endfor %}</ul>
+        {% else %}<p class="empty">Aucune commande trouvée pour cette adresse (ou historique Redis vide).</p>{% endif %}
+    {% endif %}
+</section>
 <script>
     document.getElementById('orderForm').addEventListener('submit', function (event) {
         event.preventDefault();
         const orderId = document.getElementById('orderId').value;
-        window.location.href = {{ url_for('show_order', order_id=999999) | tojson }}.replace('999999', encodeURIComponent(orderId));
+        const orderUrl = {{ url_for('show_order', order_id=999999) | tojson }};
+        window.location.href = orderUrl.replace('999999', encodeURIComponent(orderId));
     });
 </script>
-<hr>
-<h2>Historique des commandes par adresse e-mail</h2>
-<form method="GET" action="{{ url_for('show_check_order_form') }}">
-    <label for="email">Adresse e-mail :</label>
-    <input type="email" id="email" name="email" value="{{ email }}" required>
-    <button type="submit">Afficher l'historique</button>
-</form>
-{% if email %}
-    <h3>Commandes associées à {{ email }}</h3>
-    {% if orders %}
-        <ul>
-        {% for order in orders %}
-            <li><a href="{{ url_for('show_order', order_id=order.id) }}">Commande #{{ order.id }}</a> — {{ order.total_price }} € — {% if order.paid %}Payée{% else %}En attente de paiement{% endif %}</li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>Aucune commande trouvée pour cette adresse (ou historique Redis vide).</p>
-    {% endif %}
-{% endif %}
 {% endblock %}

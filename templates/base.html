@@ -3,18 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% block title %}{% endblock %}</title>
+    <meta name="theme-color" content="#101c3b">
+    <title>{% block title %}Boutique{% endblock %} · ShopDesk</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Bar de navigation</h1>
-    <nav>
-        <ul>
-            <li><a href="{{ url_for('show_products') }}">Voir les produits</a></li>
-            <li><a href="{{ url_for('show_order_form') }}">Créer une commande</a></li>
-            <li><a href="{{ url_for('show_check_order_form') }}">Consulter une commande / historique client</a></li>
-            <li><a href="{{ url_for('show_history') }}">Historique des commandes</a></li>
-        </ul>
-    </nav>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="{{ url_for('show_products') }}">Shop<span>Desk.</span></a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{{ url_for('show_products') }}">Produits</a></li>
+                <li><a href="{{ url_for('show_order_form') }}">Créer une commande</a></li>
+                <li><a href="{{ url_for('show_check_order_form') }}">Suivi client</a></li>
+                <li><a href="{{ url_for('show_history') }}">Historique</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<main>
     {% block content %}{% endblock %}
+</main>
+<footer class="footer">ShopDesk · Interface de gestion des commandes</footer>
 </body>
 </html>

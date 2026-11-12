@@ -1,20 +1,31 @@
 {% extends "base.html" %}
-{% block title %}Produits{% endblock %}
+{% block title %}Catalogue{% endblock %}
 {% block content %}
-<h1>Les produits</h1>
-<ul>
-    {% for product in products %}
-        <li>{{ product.name }} - {{ product.price }} €{% if not product.in_stock %} (indisponible){% endif %}</li>
-    {% endfor %}
-</ul>
-<section>
-    <h2>Top produits</h2>
+<h1 class="page-heading">Catalogue produits</h1>
+<p class="page-subtitle">Retrouvez les articles disponibles et les meilleures ventes.</p>
+<section class="card">
+    <div class="card-header"><h2 class="section-title">Tous les produits</h2><span class="badge">{{ products|length }} article(s)</span></div>
+    {% if products %}
+    <div class="product-grid">
+        {% for product in products %}
+        <article class="product-card">
+            <h3>{{ product.name }}</h3>
+            <p class="muted">Référence produit</p>
+            <div class="product-price">{{ product.price }} €</div>
+            {% if product.in_stock %}<span class="badge success">En stock</span>{% else %}<span class="badge pending">Indisponible</span>{% endif %}
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}<p class="empty">Aucun produit à afficher.</p>{% endif %}
+</section>
+<section class="card">
+    <div class="card-header"><h2 class="section-title">Top produits</h2><span class="badge">Données Redis</span></div>
     {% if top_products %}
-    <ol>
+    <ol class="rank-list">
         {% for product in top_products %}
-            <li>{{ product.name }} — {{ product.quantity }} vendu(s)</li>
+        <li><strong>{{ product.name }}</strong><span class="rank-count">{{ product.quantity }} vendu(s)</span></li>
         {% endfor %}
     </ol>
-    {% else %}<p>Pas encore de ventes enregistrées.</p>{% endif %}
+    {% else %}<p class="empty">Pas encore de ventes enregistrées.</p>{% endif %}
 </section>
 {% endblock %}

@@ -1,43 +1,53 @@
 {% extends "base.html" %}
 {% block title %}Commande #{{ order.id }}{% endblock %}
 {% block content %}
-<h1>Informations de la commande #{{ order.id }}</h1>
-<p><strong>Prix des produits :</strong> {{ order.total_price }} €</p>
-<p><strong>Frais de livraison :</strong> {{ order.shipping_price }} €</p>
-<p><strong>Total à payer :</strong> {{ order.total_price + order.shipping_price }} €</p>
-<p><strong>Statut :</strong> {% if order.paid %}Payée{% else %}En attente de paiement{% endif %}</p>
-<h2>Produits</h2>
-<ul>
-{% for item in order.products %}
-    <li>{{ item.name }} — quantité : {{ item.quantity }} — {{ item.price }} € / unité</li>
-{% endfor %}
-</ul>
+<h1 class="page-heading">Commande #{{ order.id }}</h1>
+<p class="page-subtitle">Détail de la commande, livraison et règlement.</p>
+<div class="grid">
+    <section class="stat"><span class="stat-label">Prix des produits</span><strong class="stat-value">{{ order.total_price }} €</strong></section>
+    <section class="stat"><span class="stat-label">Frais de livraison</span><strong class="stat-value">{{ order.shipping_price }} €</strong></section>
+    <section class="stat"><span class="stat-label">Total à payer</span><strong class="stat-value">{{ order.total_price + order.shipping_price }} €</strong></section>
+</div>
+<section class="card">
+    <div class="card-header"><h2 class="section-title">Articles commandés</h2>{% if order.paid %}<span class="badge success">Commande payée</span>{% else %}<span class="badge pending">En attente de paiement</span>{% endif %}</div>
+    <div class="table-wrap"><table><thead><tr><th>Produit</th><th>Quantité</th><th>Prix unitaire</th></tr></thead><tbody>
+    {% for item in order.products %}<tr><td>{{ item.name }}</td><td>{{ item.quantity }}</td><td>{{ item.price }} €</td></tr>{% endfor %}
+    </tbody></table></div>
+</section>
 {% if not order.email or not order.shipping_information %}
-<hr>
-<h2>Adresse de livraison</h2>
-<form method="POST" action="{{ url_for('submit_shipping_form', order_id=order.id) }}">
-    <label for="email">E-mail :</label><input type="email" id="email" name="email" value="{{ order.email or '' }}" required>
-    <label for="country">Pays :</label><input id="country" name="country" required>
-    <label for="address">Adresse :</label><input id="address" name="address" required>
-    <label for="postal_code">Code postal :</label><input id="postal_code" name="postal_code" required>
-    <label for="city">Ville :</label><input id="city" name="city" required>
-    <label for="province">Région / province :</label><input id="province" name="province" required>
-    <button type="submit">Enregistrer l'adresse</button>
-</form>
+<section class="card">
+    <h2 class="section-title">Adresse de livraison</h2>
+    <p class="muted">Renseignez les coordonnées nécessaires à l'expédition.</p>
+    <form method="POST" action="{{ url_for('submit_shipping_form', order_id=order.id) }}">
+        <div class="form-grid">
+            <div class="field"><label for="email">E-mail</label><input type="email" id="email" name="email" value="{{ order.email or '' }}" autocomplete="email" required></div>
+            <div class="field"><label for="country">Pays</label><input id="country" name="country" autocomplete="country-name" required></div>
+            <div class="field"><label for="address">Adresse</label><input id="address" name="address" autocomplete="street-address" required></div>
+            <div class="field"><label for="postal_code">Code postal</label><input id="postal_code" name="postal_code" autocomplete="postal-code" required></div>
+            <div class="field"><label for="city">Ville</label><input id="city" name="city" autocomplete="address-level2" required></div>
+            <div class="field"><label for="province">Région / province</label><input id="province" name="province" autocomplete="address-level1" required></div>
+        </div>
+        <button type="submit">Enregistrer l'adresse</button>
+    </form>
+</section>
 {% endif %}
 {% if order.email and order.shipping_information and not order.paid %}
-<hr>
-<h2>Paiement</h2>
-{% if form_error %}<p role="alert">{{ form_error }}</p>{% endif %}
-<form method="POST" action="{{ url_for('submit_payment_form', order_id=order.id) }}">
-    <label for="name">Nom sur la carte :</label><input id="name" name="name" autocomplete="cc-name" required>
-    <label for="number">Numéro de carte :</label><input id="number" name="number" inputmode="numeric" autocomplete="cc-number" pattern="[0-9 ]{13,23}" required>
-    <label for="expiration_month">Mois d'expiration :</label><input type="number" id="expiration_month" name="expiration_month" min="1" max="12" required>
-    <label for="expiration_year">Année d'expiration :</label><input type="number" id="expiration_year" name="expiration_year" min="2026" required>
-    <label for="cvv">CVV :</label><input id="cvv" name="cvv" inputmode="numeric" autocomplete="cc-csc" pattern="[0-9]{3}" maxlength="3" required>
-    <button type="submit">Payer</button>
-</form>
-<p>Paiement de démonstration : la carte 4242 4242 4242 4242 est acceptée.</p>
+<section class="card">
+    <h2 class="section-title">Paiement sécurisé</h2>
+    <p class="muted">Complétez les informations de carte pour régler la commande.</p>
+    {% if form_error %}<p class="alert" role="alert">{{ form_error }}</p>{% endif %}
+    <form method="POST" action="{{ url_for('submit_payment_form', order_id=order.id) }}">
+        <div class="field"><label for="name">Nom sur la carte</label><input id="name" name="name" autocomplete="cc-name" required></div>
+        <div class="field"><label for="number">Numéro de carte</label><input id="number" name="number" inputmode="numeric" autocomplete="cc-number" pattern="[0-9 ]{13,23}" placeholder="4242 4242 4242 4242" required></div>
+        <div class="form-grid">
+            <div class="field"><label for="expiration_month">Mois d'expiration</label><input type="number" id="expiration_month" name="expiration_month" min="1" max="12" placeholder="MM" required></div>
+            <div class="field"><label for="expiration_year">Année d'expiration</label><input type="number" id="expiration_year" name="expiration_year" min="2026" placeholder="AAAA" required></div>
+            <div class="field"><label for="cvv">Cryptogramme (CVV)</label><input id="cvv" name="cvv" inputmode="numeric" autocomplete="cc-csc" pattern="[0-9]{3}" maxlength="3" placeholder="123" required></div>
+        </div>
+        <button type="submit">Payer {{ order.total_price + order.shipping_price }} €</button>
+    </form>
+    <p class="notice">Paiement de démonstration : la carte 4242 4242 4242 4242 est acceptée.</p>
+</section>
 {% endif %}
-{% if order.paid %}<p>Cette commande a déjà été payée.</p>{% endif %}
+{% if order.paid %}<section class="card"><p class="badge success">Cette commande a déjà été payée.</p></section>{% endif %}
 {% endblock %}

@@ -1,27 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Historique des commandes{% endblock %}
+{% block title %}Historique{% endblock %}
 {% block content %}
-<h1>Historique récent des commandes</h1>
-<section>
-    <h2>Statistiques</h2>
-    <p>Nombre de commandes : <strong>{{ stats.get('orders', 0) }}</strong></p>
-    <p>Chiffre d'affaires : <strong>{{ '%.2f'|format(stats.get('revenue', 0)) }} €</strong></p>
-</section>
-<section>
-    <h2>Dernières commandes</h2>
+<h1 class="page-heading">Historique des commandes</h1>
+<p class="page-subtitle">Suivez l'activité récente de la boutique grâce aux données Redis.</p>
+<div class="grid">
+    <section class="stat"><span class="stat-label">Nombre de commandes</span><strong class="stat-value">{{ stats.get('orders', 0) }}</strong></section>
+    <section class="stat"><span class="stat-label">Chiffre d'affaires</span><strong class="stat-value">{{ '%.2f'|format(stats.get('revenue', 0)) }} €</strong></section>
+</div>
+<section class="card">
+    <div class="card-header"><h2 class="section-title">Dernières commandes</h2><span class="badge">Redis · temps réel</span></div>
     {% if orders %}
-    <table border="1" cellpadding="6">
-        <thead><tr><th>ID</th><th>E-mail</th><th>Total</th><th>Livraison</th><th>Payée</th></tr></thead>
-        <tbody>
-        {% for order in orders %}
-            <tr>
-                <td>{{ order.id }}</td><td>{{ order.email or '—' }}</td>
-                <td>{{ order.total_price }} €</td><td>{{ order.shipping_price }} €</td>
-                <td>{% if order.paid in [1, '1', true, 'True'] %}Oui{% else %}Non{% endif %}</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    {% else %}<p>Aucune commande récente disponible dans Redis.</p>{% endif %}
+    <div class="table-wrap"><table>
+        <thead><tr><th>Commande</th><th>Client</th><th>Total produits</th><th>Livraison</th><th>Statut</th></tr></thead>
+        <tbody>{% for order in orders %}
+        <tr><td><a href="{{ url_for('show_order', order_id=order.id) }}">#{{ order.id }}</a></td><td>{{ order.email or '—' }}</td><td>{{ order.total_price }} €</td><td>{{ order.shipping_price }} €</td><td>{% if order.paid in [1, '1', true, 'True'] %}<span class="badge success">Payée</span>{% else %}<span class="badge pending">En attente</span>{% endif %}</td></tr>
+        {% endfor %}</tbody>
+    </table></div>
+    {% else %}<p class="empty">Aucune commande récente disponible dans Redis.</p>{% endif %}
 </section>
 {% endblock %}
