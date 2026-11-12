@@ -5,11 +5,11 @@ Application Flask de commandes en ligne. Chaque commande est persistée dans **P
 ## TODO
 
 - **Web** : afficher les données Redis dans les pages (routes JSON déjà prêtes) :
-  - page `/web/history` : dernières commandes + stats (`/orders/recent`)
+  - page `/web/history` : dernières commandes et statistiques Redis (`/orders/recent`)
   - bloc « Top produits » sur `/web` (`/products/top`)
-  - historique par email sur `/web/checkOrder` (`/customers/<email>/orders`)
-- **Web** : formulaires pour l'adresse de livraison et le paiement (aujourd'hui uniquement via `PUT /order/<id>` en JSON)
-- **Web** : retirer `http://127.0.0.1:5000` codé en dur dans `templates/checkOrder.html` (casse en déploiement)
+  - historique par e-mail sur `/web/checkOrder` (`/customers/<email>/orders`)
+- **Web** : formulaires HTML pour l'adresse de livraison et le paiement, reliés à la logique de `PUT /order/<id>`
+- **Web** : génération des URLs avec `url_for` pour éviter les adresses locales codées en dur
 - **Web** : check les pages et les rework si besoin ?
 - **Déploiement** sur un hébergeur
 
@@ -28,7 +28,8 @@ Les tables sont créées et les produits (`products.json`) importés automatique
 |---|---|
 | Produits | http://localhost:5000/web |
 | Passer une commande (formulaire) | http://localhost:5000/web/order |
-| Consulter une commande | http://localhost:5000/web/checkOrder |
+| Consulter une commande / historique client | http://localhost:5000/web/checkOrder |
+| Historique récent + statistiques | http://localhost:5000/web/history |
 
 API JSON : `/` (produits), `/order/<id>`, `/orders/recent`, `/products/top`, `/customers/<email>/orders`.
 

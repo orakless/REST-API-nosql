@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Historique des commandes{% endblock %}
+{% block content %}
+<h1>Historique récent des commandes</h1>
+<section>
+    <h2>Statistiques</h2>
+    <p>Nombre de commandes : <strong>{{ stats.get('orders', 0) }}</strong></p>
+    <p>Chiffre d'affaires : <strong>{{ '%.2f'|format(stats.get('revenue', 0)) }} €</strong></p>
+</section>
+<section>
+    <h2>Dernières commandes</h2>
+    {% if orders %}
+    <table border="1" cellpadding="6">
+        <thead><tr><th>ID</th><th>E-mail</th><th>Total</th><th>Livraison</th><th>Payée</th></tr></thead>
+        <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>{{ order.id }}</td><td>{{ order.email or '—' }}</td>
+                <td>{{ order.total_price }} €</td><td>{{ order.shipping_price }} €</td>
+                <td>{% if order.paid in [1, '1', true, 'True'] %}Oui{% else %}Non{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}<p>Aucune commande récente disponible dans Redis.</p>{% endif %}
+</section>
+{% endblock %}

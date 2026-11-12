@@ -1,10 +1,20 @@
 {% extends "base.html" %}
 {% block title %}Produits{% endblock %}
 {% block content %}
-    <h1>Les produits</h1>
-    <ul>
-        {% for product in products %}
-            <li>{{ product.name }} - {{ product.price }}€</li>
+<h1>Les produits</h1>
+<ul>
+    {% for product in products %}
+        <li>{{ product.name }} - {{ product.price }} €{% if not product.in_stock %} (indisponible){% endif %}</li>
+    {% endfor %}
+</ul>
+<section>
+    <h2>Top produits</h2>
+    {% if top_products %}
+    <ol>
+        {% for product in top_products %}
+            <li>{{ product.name }} — {{ product.quantity }} vendu(s)</li>
         {% endfor %}
-    </ul>
+    </ol>
+    {% else %}<p>Pas encore de ventes enregistrées.</p>{% endif %}
+</section>
 {% endblock %}

@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
     <h1>Bar de navigation</h1>
-    <ul>
-        <li><a href="/web/checkOrder">Verifier informations d'une commande</a></li>
-        <li><a href="/web/order">Creer une commande</a></li>
-        <li><a href="/web">Voir les produits</a></li>
-    </ul>
-    {% block content %}
-    {% endblock %}
+    <nav>
+        <ul>
+            <li><a href="{{ url_for('show_products') }}">Voir les produits</a></li>
+            <li><a href="{{ url_for('show_order_form') }}">Créer une commande</a></li>
+            <li><a href="{{ url_for('show_check_order_form') }}">Consulter une commande / historique client</a></li>
+            <li><a href="{{ url_for('show_history') }}">Historique des commandes</a></li>
+        </ul>
+    </nav>
+    {% block content %}{% endblock %}
 </body>
 </html>

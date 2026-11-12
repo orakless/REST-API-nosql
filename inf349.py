@@ -210,11 +210,9 @@ def get_order(order_id):
     return jsonify({"order": order})
 
 
-@app.route('/order/<int:order_id>', methods=['PUT'])
-def put_order(order_id):
-    data = request.get_json(silent=True) or {}
+def apply_order_update(order_id, data):
+    """Applique une mise à jour commune à l'API JSON et aux formulaires Web."""
     order = Order.get_or_none(id=order_id)
-
     if order is None:
         return error(*ORDER_NOT_FOUND)
 
@@ -223,7 +221,7 @@ def put_order(order_id):
             return error(*ORDER_MISSING_FIELDS)
 
         card_data = data['credit_card']
-        if not all(k in card_data for k in ('number', 'expiration_year', 'expiration_month', 'cvv', 'name')):
+        if not isinstance(card_data, dict) or not all(k in card_data for k in ('number', 'expiration_year', 'expiration_month', 'cvv', 'name')):
             return error(*ORDER_MISSING_FIELDS)
 
         if order.email is None or order.shipping_information is None:
@@ -247,17 +245,17 @@ def put_order(order_id):
         redis_store.record_order_paid(order_dict, amount_charged)
         return jsonify({"order": order_dict})
 
-    data = data['order']
-    if 'shipping_information' not in data or 'email' not in data:
+    order_data = data['order']
+    if not isinstance(order_data, dict) or 'shipping_information' not in order_data or 'email' not in order_data:
         return error(*ORDER_MISSING_FIELDS)
 
-    ship_data = data['shipping_information']
-    if not all(k in ship_data for k in ('country', 'address', 'postal_code', 'city', 'province')):
+    ship_data = order_data['shipping_information']
+    if not isinstance(ship_data, dict) or not all(k in ship_data for k in ('country', 'address', 'postal_code', 'city', 'province')):
         return error(*ORDER_MISSING_FIELDS)
 
     with db.atomic():
         order.shipping_information = ShippingInformation.create(country=ship_data['country'], address=ship_data['address'], postal_code=ship_data['postal_code'], city=ship_data['city'], province=ship_data['province'])
-        order.email = data['email']
+        order.email = order_data['email']
         order.save()
 
     order_dict = order.to_dict()
@@ -265,12 +263,24 @@ def put_order(order_id):
     return jsonify({"order": order_dict})
 
 
+@app.route('/order/<int:order_id>', methods=['PUT'])
+def put_order(order_id):
+    return apply_order_update(order_id, request.get_json(silent=True) or {})
+
+
 # ---------------------------------------------------------------- Web
 
 @app.route('/web', methods=['GET'])
 def show_products():
     products = get_products().json['products']
-    return render_template('products.html', products=products)
+    top_products = get_top_products().json['products']
+    return render_template('products.html', products=products, top_products=top_products)
+
+
+@app.route('/web/history', methods=['GET'])
+def show_history():
+    data = get_recent_orders().json
+    return render_template('history.html', orders=data.get('orders', []), stats=data.get('stats', {}))
 
 
 @app.route('/web/order', methods=['GET'])
@@ -291,9 +301,63 @@ def show_order(order_id):
     return render_template('orderInfo.html', order=with_product_details(order))
 
 
+@app.route('/web/order/<int:order_id>/shipping', methods=['POST'])
+def submit_shipping_form(order_id):
+    data = {'order': {
+        'email': request.form.get('email', '').strip(),
+        'shipping_information': {key: request.form.get(key, '').strip()
+                                 for key in ('country', 'address', 'postal_code', 'city', 'province')}
+    }}
+    response = apply_order_update(order_id, data)
+    status = response[1] if isinstance(response, tuple) else response.status_code
+    if status >= 400:
+        message = response[0].get_json() if isinstance(response, tuple) else response.get_json()
+        error_message = message.get('errors', {}).get('order', {}).get('name', 'Impossible d’enregistrer les informations.')
+        order = load_order(order_id)
+        if order is None:
+            return error(*ORDER_NOT_FOUND)
+        return render_template('orderInfo.html', order=with_product_details(order), form_error=error_message), status
+    return redirect(url_for('show_order', order_id=order_id))
+
+
+@app.route('/web/order/<int:order_id>/payment', methods=['POST'])
+def submit_payment_form(order_id):
+    try:
+        card = {
+            'name': request.form.get('name', '').strip(),
+            'number': request.form.get('number', '').replace(' ', ''),
+            'expiration_month': int(request.form.get('expiration_month', '')),
+            'expiration_year': int(request.form.get('expiration_year', '')),
+            'cvv': request.form.get('cvv', '').strip()
+        }
+    except ValueError:
+        order = load_order(order_id)
+        if order is None:
+            return error(*ORDER_NOT_FOUND)
+        return render_template('orderInfo.html', order=with_product_details(order), form_error='Informations de carte invalides.'), 400
+    response = apply_order_update(order_id, {'credit_card': card})
+    status = response[1] if isinstance(response, tuple) else response.status_code
+    if status >= 400:
+        message = response[0].get_json() if isinstance(response, tuple) else response.get_json()
+        error_message = message.get('errors', {}).get('credit_card', {}).get('name') or message.get('errors', {}).get('order', {}).get('name') or 'Le paiement a échoué.'
+        order = load_order(order_id)
+        if order is None:
+            return error(*ORDER_NOT_FOUND)
+        return render_template('orderInfo.html', order=with_product_details(order), form_error=error_message), status
+    return redirect(url_for('show_order', order_id=order_id))
+
+
 @app.route('/web/checkOrder', methods=['GET'])
 def show_check_order_form():
-    return render_template('checkOrder.html')
+    email = request.args.get('email', '').strip()
+    orders = []
+    if email:
+        order_ids = get_customer_orders(email).json['orders']
+        for order_id in order_ids:
+            order = load_order(order_id)
+            if order:
+                orders.append(with_product_details(order))
+    return render_template('checkOrder.html', email=email, orders=orders)
 
 
 if __name__ == '__main__':
