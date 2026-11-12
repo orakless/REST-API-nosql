@@ -2,16 +2,126 @@
 {% block title %}Nouvelle commande{% endblock %}
 {% block content %}
 <h1 class="page-heading">Créer une commande</h1>
-<p class="page-subtitle">Sélectionnez les produits et les quantités souhaitées.</p>
-<section class="card">
-    <form id="orderForm" action="{{ url_for('submit_order_form') }}" method="POST">
-        <div class="form-grid">
-            <div class="field"><label for="productId">Identifiant du produit 1</label><input type="number" min="1" id="productId" name="productId" required></div>
-            <div class="field"><label for="quantity">Quantité</label><input type="number" min="1" id="quantity" name="quantity" required></div>
-            <div class="field"><label for="productId2">Identifiant du produit 2</label><input type="number" min="1" id="productId2" name="productId2" required></div>
-            <div class="field"><label for="quantity2">Quantité</label><input type="number" min="1" id="quantity2" name="quantity2" required></div>
+<p class="page-subtitle">Choisissez les articles dans le catalogue, puis indiquez les quantités souhaitées.</p>
+
+<section class="card order-builder">
+    <div class="card-header">
+        <div>
+            <h2 class="section-title">Votre sélection</h2>
+            <p class="muted">Seuls les produits actuellement en stock sont proposés.</p>
         </div>
-        <button type="submit">Créer la commande</button>
+        <span class="badge" id="itemCount">1 article</span>
+    </div>
+
+    {% if products %}
+    <form id="orderForm" action="{{ url_for('submit_order_form') }}" method="POST">
+        <div class="order-lines" id="orderLines">
+            <div class="order-line" data-line="1">
+                <div class="line-number">1</div>
+                <div class="field product-field">
+                    <label for="productId">Produit</label>
+                    <select id="productId" name="productId" class="product-select" required>
+                        <option value="" data-price="0">Choisir un produit...</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}" data-price="{{ product.price }}">{{ product.name }} — {{ '%.2f'|format(product.price) }} €</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field quantity-field">
+                    <label for="quantity">Quantité</label>
+                    <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                </div>
+                <div class="line-total" aria-live="polite">—</div>
+                <button type="button" class="remove-line" aria-label="Supprimer cette ligne" title="Supprimer" disabled>×</button>
+            </div>
+        </div>
+
+        <button type="button" class="add-line-button" id="addLine">＋ Ajouter un produit</button>
+
+        <div class="order-summary">
+            <div>
+                <span class="muted">Sous-total des produits (hors livraison)</span>
+                <strong id="orderTotal">0,00 €</strong>
+            </div>
+            <button type="submit" class="create-order-button">Créer la commande</button>
+        </div>
     </form>
+    {% else %}
+    <p class="empty">Aucun produit n'est actuellement disponible.</p>
+    {% endif %}
 </section>
+
+<script>
+(() => {
+    const lines = document.getElementById('orderLines');
+    const addButton = document.getElementById('addLine');
+    const totalElement = document.getElementById('orderTotal');
+    const countElement = document.getElementById('itemCount');
+    const maxLines = 10;
+    if (!lines || !addButton) return;
+
+    const euro = value => new Intl.NumberFormat('fr-FR', {style: 'currency', currency: 'EUR'}).format(value);
+
+    function updateSummary() {
+        let total = 0;
+        let count = 0;
+        lines.querySelectorAll('.order-line').forEach(line => {
+            const select = line.querySelector('.product-select');
+            const quantity = line.querySelector('input[type="number"]');
+            const price = Number(select.selectedOptions[0]?.dataset.price || 0);
+            const qty = Math.max(0, Number(quantity.value || 0));
+            const lineTotal = price * qty;
+            total += lineTotal;
+            if (select.value) count++;
+            line.querySelector('.line-total').textContent = select.value ? euro(lineTotal) : '—';
+        });
+        totalElement.textContent = euro(total);
+        countElement.textContent = `${count} produit${count > 1 ? 's' : ''} sélectionné${count > 1 ? 's' : ''}`;
+        addButton.disabled = lines.querySelectorAll('.order-line').length >= maxLines;
+        lines.querySelectorAll('.remove-line').forEach(button => {
+            button.disabled = lines.querySelectorAll('.order-line').length === 1;
+        });
+    }
+
+    function renumberLines() {
+        [...lines.querySelectorAll('.order-line')].forEach((line, index) => {
+            const suffix = index === 0 ? '' : String(index + 1);
+            line.dataset.line = String(index + 1);
+            line.querySelector('.line-number').textContent = String(index + 1);
+            const select = line.querySelector('.product-select');
+            const quantity = line.querySelector('input[type="number"]');
+            select.name = `productId${suffix}`;
+            select.id = `productId${suffix}`;
+            select.previousElementSibling?.setAttribute('for', select.id);
+            quantity.name = `quantity${suffix}`;
+            quantity.id = `quantity${suffix}`;
+            quantity.previousElementSibling?.setAttribute('for', quantity.id);
+        });
+        updateSummary();
+    }
+
+    function addLine() {
+        const current = lines.querySelectorAll('.order-line').length;
+        if (current >= maxLines) return;
+        const first = lines.querySelector('.order-line');
+        const clone = first.cloneNode(true);
+        clone.querySelector('.product-select').value = '';
+        clone.querySelector('input[type="number"]').value = '1';
+        clone.querySelector('.line-total').textContent = '—';
+        lines.appendChild(clone);
+        renumberLines();
+    }
+
+    addButton.addEventListener('click', addLine);
+    lines.addEventListener('change', updateSummary);
+    lines.addEventListener('input', updateSummary);
+    lines.addEventListener('click', event => {
+        const button = event.target.closest('.remove-line');
+        if (!button || button.disabled) return;
+        button.closest('.order-line').remove();
+        renumberLines();
+    });
+    updateSummary();
+})();
+</script>
 {% endblock %}

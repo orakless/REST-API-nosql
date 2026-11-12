@@ -285,7 +285,8 @@ def show_history():
 
 @app.route('/web/order', methods=['GET'])
 def show_order_form():
-    return render_template('orderForm.html')
+    products = list(Product.select().where(Product.in_stock == True).order_by(Product.name))
+    return render_template('orderForm.html', products=products)
 
 
 @app.route('/web/order', methods=['POST'])
