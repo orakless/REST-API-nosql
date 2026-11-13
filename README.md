@@ -2,6 +2,8 @@
 
 Application Flask de commandes en ligne. Chaque commande est persistée dans **PostgreSQL** et **Redis** (historique, événements, statistiques, cache).
 
+[Hebergé ici](https://nosql.mudakle.fr/web)
+
 ## Lancer
 
 ```bash
